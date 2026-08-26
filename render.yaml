@@ -1,0 +1,37 @@
+services:
+  - type: web
+    name: teamspace
+    runtime: python
+    plan: starter          # not free — see deployment notes; needed for the disk below
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn run:app --bind 0.0.0.0:$PORT --workers 2 --timeout 120
+    autoDeploy: true
+    disk:
+      name: teamspace-uploads
+      mountPath: /data/uploads
+      sizeGB: 1
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: teamspace-db
+          property: connectionString
+      - key: UPLOAD_DIR
+        value: /data/uploads
+      - key: FLASK_DEBUG
+        value: "false"
+      - key: GEMINI_API_KEY
+        sync: false        # set manually in Render dashboard — do not commit real keys
+      - key: GEMINI_MODEL
+        value: gemini-2.5-flash
+      - key: MAIL_USERNAME
+        sync: false
+      - key: MAIL_PASSWORD
+        sync: false
+      - key: MAIL_DEFAULT_SENDER
+        sync: false
+
+databases:
+  - name: teamspace-db
+    plan: basic-256mb

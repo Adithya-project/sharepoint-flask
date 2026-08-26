@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - TeamSpace{% endblock %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h3 class="mb-0">Your Sites</h3>
+  <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newSiteModal">
+    <i class="bi bi-plus-lg"></i> New Site
+  </button>
+</div>
+
+{% if sites|length == 0 %}
+  <div class="alert alert-secondary">You don't belong to any sites yet. Create one to get started.</div>
+{% endif %}
+
+<div class="row g-3">
+  {% for site in sites %}
+    <div class="col-md-4">
+      <div class="card h-100 shadow-sm">
+        <div class="card-body">
+          <h5 class="card-title"><i class="bi bi-people-fill text-primary"></i> {{ site.name }}</h5>
+          <p class="card-text text-muted small">{{ site.description or 'No description' }}</p>
+          <p class="card-text small">Owner: {{ site.owner.name }} &middot; {{ site.member_count }} member(s)</p>
+          <a href="{{ url_for('sites.view_site', id=site.id) }}" class="btn btn-sm btn-outline-primary">Open</a>
+        </div>
+      </div>
+    </div>
+  {% endfor %}
+</div>
+
+<div class="modal fade" id="newSiteModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form method="POST" action="{{ url_for('sites.create_site') }}">
+        <div class="modal-header">
+          <h5 class="modal-title">Create a new site</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">Site name</label>
+            <input type="text" name="name" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Description</label>
+            <textarea name="description" class="form-control" rows="2"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">Create</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Search - TeamSpace{% endblock %}
+{% block content %}
+
+<h3 class="mb-3">Search results for "{{ q }}"</h3>
+
+{% if not q %}
+  <p class="text-muted">Type a search term above to find files and folders across your sites.</p>
+  <form method="POST" action="{{ url_for('ai.backfill_embeddings') }}" class="mt-3">
+    <button class="btn btn-sm btn-outline-secondary" type="submit">
+      <i class="bi bi-magic"></i> Enable AI semantic search for existing files
+    </button>
+    <p class="text-muted small mt-1">One-time: embeds the names of files uploaded before AI search was added.</p>
+  </form>
+{% elif files|length == 0 and folders|length == 0 %}
+  <div class="alert alert-secondary">No results found.</div>
+{% else %}
+  {% if semantic_used %}
+    <p class="text-muted small"><i class="bi bi-stars text-primary"></i> Results ranked by AI semantic similarity.</p>
+  {% endif %}
+  {% if folders|length %}
+    <h6 class="text-muted mt-3">Folders</h6>
+    <div class="list-group mb-4">
+      {% for f in folders %}
+        <a href="{{ url_for('sites.view_site', id=f.site_id, folder=f.id) }}" class="list-group-item list-group-item-action">
+          <i class="bi bi-folder-fill text-warning me-2"></i>{{ f.name }}
+          <span class="text-muted small">in {{ f.site.name }}</span>
+        </a>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  {% if files|length %}
+    <h6 class="text-muted">Files</h6>
+    <div class="list-group">
+      {% for file in files %}
+        <a href="{{ url_for('files.view_file', site_id=file.site_id, file_id=file.id) }}" class="list-group-item list-group-item-action">
+          <i class="bi bi-file-earmark-text text-primary me-2"></i>{{ file.original_name }}
+          <span class="text-muted small">in {{ file.site.name }}</span>
+        </a>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endif %}
+
+{% endblock %}

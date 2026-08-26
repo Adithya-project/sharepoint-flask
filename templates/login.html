@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Login - TeamSpace{% endblock %}
+{% block content %}
+<div class="row justify-content-center mt-5">
+  <div class="col-md-5">
+    <div class="card shadow-sm">
+      <div class="card-body p-4">
+        <h3 class="mb-3 text-center"><i class="bi bi-grid-1x2-fill"></i> Log in to TeamSpace</h3>
+        <form method="POST" action="{{ url_for('auth.login') }}">
+          <div class="mb-3">
+            <label class="form-label">Email</label>
+            <input type="email" name="email" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Password</label>
+            <input type="password" name="password" class="form-control" required>
+          </div>
+          <button type="submit" class="btn btn-primary w-100">Log in</button>
+        </form>
+        <p class="text-center mt-3 mb-0">No account? <a href="{{ url_for('auth.register') }}">Register</a></p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

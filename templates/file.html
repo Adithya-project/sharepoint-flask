@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}{{ file.original_name }} - TeamSpace{% endblock %}
+{% block content %}
+
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{{ url_for('sites.dashboard') }}">Sites</a></li>
+    <li class="breadcrumb-item"><a href="{{ url_for('sites.view_site', id=site.id) }}">{{ site.name }}</a></li>
+    <li class="breadcrumb-item active">{{ file.original_name }}</li>
+  </ol>
+</nav>
+
+{% if file.ai_suggested_folder_id and not file.ai_suggestion_dismissed %}
+  <div class="alert alert-primary d-flex justify-content-between align-items-center">
+    <div>
+      <i class="bi bi-stars"></i>
+      <strong>AI suggests</strong> this file belongs in
+      <strong>{{ file.suggested_folder.name }}</strong>.
+      {% if file.ai_suggestion_reason %}
+        <span class="text-muted small d-block">{{ file.ai_suggestion_reason }}</span>
+      {% endif %}
+    </div>
+    <div>
+      <form method="POST" action="{{ url_for('files.accept_suggestion', site_id=site.id, file_id=file.id) }}" class="d-inline">
+        <button class="btn btn-sm btn-primary">Move there</button>
+      </form>
+      <form method="POST" action="{{ url_for('files.dismiss_suggestion', site_id=site.id, file_id=file.id) }}" class="d-inline">
+        <button class="btn btn-sm btn-outline-secondary">Dismiss</button>
+      </form>
+    </div>
+  </div>
+{% endif %}
+
+<div class="card mb-4">
+  <div class="card-body">
+    <h4><i class="bi bi-file-earmark-text text-primary"></i> {{ file.original_name }}</h4>
+    <p class="text-muted mb-1">Uploaded by {{ file.uploader.name }} on {{ file.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
+    <p class="text-muted">Size: {{ (file.size / 1024) | round(1) }} KB &middot; Type: {{ file.mime_type }}</p>
+    <a href="{{ url_for('files.download_file', site_id=site.id, file_id=file.id) }}" class="btn btn-primary btn-sm">
+      <i class="bi bi-download"></i> Download
+    </a>
+  </div>
+</div>
+
+{% if file.summary %}
+  <div class="card mb-4 border-primary">
+    <div class="card-body">
+      <h5 class="card-title"><i class="bi bi-stars text-primary"></i> AI summary <span class="badge bg-secondary">{{ file.summary_kind }}</span></h5>
+      <p class="mb-2" style="white-space: pre-wrap">{{ file.summary }}</p>
+      <form method="POST" action="{{ url_for('files.regenerate_summary', site_id=site.id, file_id=file.id) }}" class="d-inline">
+        <input type="hidden" name="kind" value="detailed" />
+        <button class="btn btn-sm btn-outline-primary">Regenerate as detailed</button>
+      </form>
+    </div>
+  </div>
+{% else %}
+  <form method="POST" action="{{ url_for('files.generate_summary', site_id=site.id, file_id=file.id) }}" class="mb-4">
+    <input type="hidden" name="kind" value="short" />
+    <button class="btn btn-sm btn-outline-primary">
+      <i class="bi bi-stars"></i> Generate AI summary
+    </button>
+  </form>
+{% endif %}
+
+<h5>Comments</h5>
+<div class="list-group mb-3">
+  {% if comments|length == 0 %}
+    <div class="list-group-item text-muted">No comments yet.</div>
+  {% endif %}
+  {% for c in comments %}
+    <div class="list-group-item">
+      <div class="d-flex justify-content-between">
+        <strong>{{ c.author.name }}</strong>
+        <span class="text-muted small">{{ c.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+      </div>
+      <p class="mb-0">{{ c.body }}</p>
+    </div>
+  {% endfor %}
+</div>
+
+<form method="POST" action="{{ url_for('files.add_comment', site_id=site.id, file_id=file.id) }}">
+  <div class="mb-2">
+    <textarea name="body" class="form-control" rows="2" placeholder="Add a comment..." required></textarea>
+  </div>
+  <button type="submit" class="btn btn-primary btn-sm">Post comment</button>
+</form>
+
+{% endblock %}
